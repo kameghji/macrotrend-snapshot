@@ -2,40 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { MacroData, StockData } from '@/lib/data';
 
-// Function to fetch macro data from an API
-const fetchMacroData = async (): Promise<MacroData[]> => {
-  // In a real app, we would fetch from a real API
-  // For demo purposes, we're using a mock fetch that returns data with the current month
-  const response = await fetch('https://api.example.com/macroeconomic-data');
-  
-  // If the API is not available, return mock data with current month
-  if (!response.ok) {
-    console.log('Using mock data as fallback');
-    return generateMockData();
-  }
-  
-  return response.json();
-};
-
-// Function to fetch stock data from an API
-const fetchStockData = async (): Promise<StockData[]> => {
-  // In a real app, we would fetch from a real API
-  const response = await fetch('https://api.example.com/stock-data');
-  
-  // If the API is not available, return mock data
-  if (!response.ok) {
-    console.log('Using mock stock data as fallback');
-    return [
-      { name: "S&P 500", symbol: "SPX", price: 6100, change: 1.2 },
-      { name: "Dow Jones", symbol: "DJI", price: 41500, change: 0.8 },
-      { name: "NASDAQ", symbol: "IXIC", price: 19200, change: 1.5 },
-      { name: "Russell 2000", symbol: "RUT", price: 2300, change: -0.4 }
-    ];
-  }
-  
-  return response.json();
-};
-
 // Generate mock data starting from current month backward
 const generateMockData = (): MacroData[] => {
   const now = new Date();
@@ -60,6 +26,16 @@ const generateMockData = (): MacroData[] => {
   
   // Reverse the array so it goes from oldest to newest (for chart display)
   return months.reverse();
+};
+
+// Generate mock stock data
+const generateMockStockData = (): StockData[] => {
+  return [
+    { name: "S&P 500", symbol: "SPX", price: 6100, change: 1.2 },
+    { name: "Dow Jones", symbol: "DJI", price: 41500, change: 0.8 },
+    { name: "NASDAQ", symbol: "IXIC", price: 19200, change: 1.5 },
+    { name: "Russell 2000", symbol: "RUT", price: 2300, change: -0.4 }
+  ];
 };
 
 // Calculate trends between the latest two data points
@@ -91,6 +67,19 @@ export const calculateTrends = (data: MacroData[]) => {
       change: ((latest.stockIndex - previous.stockIndex) / previous.stockIndex) * 100,
     }
   };
+};
+
+// Mock fetching functions that directly return the mock data
+const fetchMacroData = async (): Promise<MacroData[]> => {
+  // Simulate a small delay to mimic network request
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return generateMockData();
+};
+
+const fetchStockData = async (): Promise<StockData[]> => {
+  // Simulate a small delay to mimic network request
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return generateMockStockData();
 };
 
 export const useMacroData = () => {
