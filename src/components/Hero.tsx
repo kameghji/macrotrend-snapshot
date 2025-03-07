@@ -2,16 +2,18 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { formatPercent } from '@/lib/data';
-import { ArrowDown, ArrowUpRight, Minus, RefreshCw } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Minus, RefreshCw, Database } from 'lucide-react';
 import AnimatedNumber from './AnimatedNumber';
 import useMacroData from '@/hooks/useMacroData';
+import ApiKeyForm from './ApiKeyForm';
+import { Button } from '@/components/ui/button';
 
 interface HeroProps {
   className?: string;
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { trends, macroData, isLoading } = useMacroData();
+  const { trends, macroData, isLoading, isRealData, updateApiKey, refetchData } = useMacroData();
 
   if (!trends && !isLoading) return null;
 
@@ -52,15 +54,32 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
       <div className="relative z-10 py-12 px-6 md:px-12 max-w-7xl mx-auto">
         <div className="animate-fade-in">
           <div className="flex flex-col space-y-2 mb-8">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
-              {isLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
+                {isLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />}
+                {isRealData && <Database className="h-3 w-3 text-green-500 ml-2" />}
+              </div>
+              <div className="flex items-center space-x-2">
+                <ApiKeyForm onApiKeySet={updateApiKey} />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => refetchData()} 
+                  disabled={isLoading}
+                >
+                  <RefreshCw className={cn("h-3 w-3 mr-2", isLoading && "animate-spin")} />
+                  Refresh
+                </Button>
+              </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               Macroeconomic Snapshot
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl">
-              Monthly overview of key economic indicators with auto-updating data
+              {isRealData 
+                ? "Live data from Trading Economics, BLS, and Yahoo Finance via OpenAI"
+                : "Monthly overview of key economic indicators with mock data"}
             </p>
           </div>
           

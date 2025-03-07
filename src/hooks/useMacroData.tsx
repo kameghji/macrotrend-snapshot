@@ -1,8 +1,9 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { MacroData, StockData } from '@/lib/data';
+import { fetchEconomicDataWithAI } from '@/services/openaiService';
+import { useState, useCallback } from 'react';
 
-// Generate mock data starting from current month backward
+// Generate mock data as fallback
 const generateMockData = (): MacroData[] => {
   const now = new Date();
   const months = [];
@@ -28,7 +29,7 @@ const generateMockData = (): MacroData[] => {
   return months.reverse();
 };
 
-// Generate mock stock data
+// Generate mock stock data as fallback
 const generateMockStockData = (): StockData[] => {
   return [
     { name: "S&P 500", symbol: "SPX", price: 6100, change: 1.2 },
@@ -69,55 +70,91 @@ export const calculateTrends = (data: MacroData[]) => {
   };
 };
 
-// Mock fetching functions that directly return the mock data
-const fetchMacroData = async (): Promise<MacroData[]> => {
+// Mock fetching functions as fallback
+const fetchMockMacroData = async (): Promise<MacroData[]> => {
   // Simulate a small delay to mimic network request
   await new Promise(resolve => setTimeout(resolve, 500));
   return generateMockData();
 };
 
-const fetchStockData = async (): Promise<StockData[]> => {
+const fetchMockStockData = async (): Promise<StockData[]> => {
   // Simulate a small delay to mimic network request
   await new Promise(resolve => setTimeout(resolve, 500));
   return generateMockStockData();
 };
 
+// The actual data fetching function that tries to use OpenAI first
+const fetchRealEconomicData = async (apiKey: string | null): Promise<{
+  macroData: MacroData[];
+  stockData: StockData[];
+}> => {
+  // If no API key is provided, fall back to mock data
+  if (!apiKey) {
+    console.log("No API key provided, using mock data");
+    return {
+      macroData: await fetchMockMacroData(),
+      stockData: await fetchMockStockData()
+    };
+  }
+
+  try {
+    console.log("Fetching real economic data with OpenAI");
+    const result = await fetchEconomicDataWithAI(apiKey);
+    
+    if (!result.success || !result.macroData.length || !result.stockData.length) {
+      console.log("Failed to fetch real data:", result.error);
+      throw new Error(result.error || "Failed to fetch data");
+    }
+    
+    console.log("Successfully fetched real economic data");
+    return {
+      macroData: result.macroData,
+      stockData: result.stockData
+    };
+  } catch (error) {
+    console.error("Error fetching real data, falling back to mock data:", error);
+    return {
+      macroData: await fetchMockMacroData(),
+      stockData: await fetchMockStockData()
+    };
+  }
+};
+
 export const useMacroData = () => {
-  // Fetch macro data with react-query
-  // Set staleTime to 1 day (86400000 ms) so it refreshes daily
-  // This allows for monthly data to be current
-  const { 
-    data: macroData, 
-    isLoading: isLoadingMacro,
-    error: macroError 
-  } = useQuery({
-    queryKey: ['macroData'],
-    queryFn: fetchMacroData,
-    staleTime: 86400000, // 1 day in milliseconds
-    refetchOnWindowFocus: false,
-  });
+  const [apiKey, setApiKey] = useState<string | null>(
+    localStorage.getItem('openai_api_key')
+  );
   
-  // Fetch stock data with react-query
+  // Function to update the API key
+  const updateApiKey = useCallback((newApiKey: string) => {
+    setApiKey(newApiKey);
+  }, []);
+  
+  // Fetch economic data with react-query
   const { 
-    data: stockData, 
-    isLoading: isLoadingStock,
-    error: stockError 
+    data, 
+    isLoading,
+    error,
+    refetch 
   } = useQuery({
-    queryKey: ['stockData'],
-    queryFn: fetchStockData,
-    staleTime: 86400000, // 1 day in milliseconds
+    queryKey: ['economicData', apiKey],
+    queryFn: () => fetchRealEconomicData(apiKey),
+    staleTime: 3600000, // 1 hour in milliseconds
     refetchOnWindowFocus: false,
   });
   
   // Calculate trends if macro data is available
-  const trends = macroData ? calculateTrends(macroData) : null;
+  const trends = data?.macroData ? calculateTrends(data.macroData) : null;
   
   return { 
-    macroData: macroData || [],
-    stockData: stockData || [],
+    macroData: data?.macroData || [],
+    stockData: data?.stockData || [],
     trends,
-    isLoading: isLoadingMacro || isLoadingStock,
-    error: macroError || stockError 
+    isLoading,
+    error,
+    isRealData: !!apiKey,
+    updateApiKey,
+    refetchData: refetch
   };
 };
 

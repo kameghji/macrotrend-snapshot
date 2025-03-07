@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import MacroIndicator from '@/components/MacroIndicator';
@@ -6,14 +5,14 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import useMacroData from '@/hooks/useMacroData';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Database } from 'lucide-react';
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
   const { toast } = useToast();
   
   // Use the custom hook to fetch macro and stock data
-  const { macroData, stockData, isLoading, error } = useMacroData();
+  const { macroData, stockData, isLoading, error, isRealData } = useMacroData();
 
   // Show error toast if data fetching fails
   useEffect(() => {
@@ -50,11 +49,19 @@ const Index = () => {
             <h2 className="text-2xl font-semibold tracking-tight">
               Economic Indicators
             </h2>
-            {isLoading && (
-              <span className="text-sm text-muted-foreground animate-pulse">
-                Refreshing data...
-              </span>
-            )}
+            <div className="flex items-center">
+              {isLoading && (
+                <span className="text-sm text-muted-foreground animate-pulse mr-2">
+                  Refreshing data...
+                </span>
+              )}
+              {isRealData && (
+                <span className="text-sm text-green-600 flex items-center">
+                  <Database className="h-3 w-3 mr-1" />
+                  Live Data
+                </span>
+              )}
+            </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
@@ -134,8 +141,8 @@ const Index = () => {
         </div>
         
         <footer className="mt-20 text-center text-sm text-muted-foreground">
-          <p>Data updated as of {lastUpdated}</p>
-          <p className="mt-1">© {new Date().getFullYear()} Macrotrend Snapshot</p>
+          <p>Data {isRealData ? "fetched" : "updated"} as of {lastUpdated}</p>
+          <p className="mt-1">© {new Date().getFullYear()} Macrotrend Snapshot{isRealData ? " • Powered by OpenAI" : ""}</p>
         </footer>
       </main>
     </div>
