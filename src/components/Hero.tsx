@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { formatPercent } from '@/lib/data';
@@ -10,7 +11,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { trends, isLoading } = useMacroData();
+  const { trends, macroData, isLoading } = useMacroData();
 
   if (!trends && !isLoading) return null;
 
@@ -149,7 +150,7 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
             </div>
           </div>
           
-          {/* Ticker remains the same but with a loading state */}
+          {/* Ticker with historical rates */}
           <div className={cn("glass rounded-2xl p-4 overflow-hidden animate-slide-up [animation-delay:400ms]", 
                             isLoading && "animate-pulse")}>
             {isLoading ? (
@@ -157,11 +158,18 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
             ) : (
               <div className="ticker-wrapper">
                 <div className="ticker">
-                  {Array(2).fill([]). // We'll use empty array here since actual data comes from the hook
-                    map((_, index) => (
-                    <span key={index} className="inline-block mx-6">
-                      Data auto-updates monthly with the latest economic indicators
-                    </span>
+                  {Array(2).fill(macroData).map((data, index) => (
+                    <div key={index} className="inline-flex space-x-8 mx-6">
+                      {data.map((month, i) => (
+                        <span key={i} className="whitespace-nowrap">
+                          <span className="font-medium">{month.date}:</span>{' '}
+                          <span className="text-blue-600">Inflation {month.inflation.toFixed(1)}%</span>{' | '}
+                          <span className="text-green-600">Interest {month.interest.toFixed(1)}%</span>{' | '}
+                          <span className="text-red-600">Unemployment {month.unemployment.toFixed(1)}%</span>{' | '}
+                          <span className="text-purple-600">Market {month.stockIndex.toLocaleString()}</span>
+                        </span>
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>
