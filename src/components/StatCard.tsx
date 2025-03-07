@@ -50,10 +50,14 @@ const StatCard: React.FC<StatCardProps> = ({
         <div className="flex items-center space-x-1">
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
           {isMockData && (
-            <GhostIcon className="h-3 w-3 text-amber-500 ml-1" title="Mock data" />
+            <span className="inline-flex items-center tooltip" aria-label="Mock data">
+              <GhostIcon className="h-3 w-3 text-amber-500 ml-1" />
+            </span>
           )}
           {!isMockData && (
-            <Database className="h-3 w-3 text-green-500 ml-1" title="Real data" />
+            <span className="inline-flex items-center tooltip" aria-label="Real data">
+              <Database className="h-3 w-3 text-green-500 ml-1" />
+            </span>
           )}
         </div>
         

@@ -141,7 +141,11 @@ const Index = () => {
                   <div className="flex justify-between items-baseline mb-2">
                     <div className="flex items-center">
                       <h3 className="font-medium">{stock.name}</h3>
-                      {!isRealData && <GhostIcon className="h-3 w-3 text-amber-500 ml-1" title="Mock data" />}
+                      {!isRealData && (
+                        <span className="inline-flex items-center tooltip" aria-label="Mock data">
+                          <GhostIcon className="h-3 w-3 text-amber-500 ml-1" />
+                        </span>
+                      )}
                     </div>
                     <span className="text-sm text-muted-foreground">{stock.symbol}</span>
                   </div>
