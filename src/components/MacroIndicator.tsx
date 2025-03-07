@@ -31,8 +31,8 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
   if (isLoading) {
     return (
       <div className={cn('flex flex-col space-y-4', className)}>
-        <div className="glass animate-pulse rounded-2xl p-5 h-24"></div>
-        <div className="glass animate-pulse rounded-2xl overflow-hidden p-4 h-[300px]"></div>
+        <div className="glass animate-pulse rounded-2xl p-4 h-20"></div>
+        <div className="glass animate-pulse rounded-2xl overflow-hidden p-4 h-[340px]"></div>
       </div>
     );
   }
@@ -70,9 +70,10 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
         formatFn={displayFormatter}
         isPercent={isPercent || dataKey === 'stockIndex'}
         inverseTrend={inverseTrend}
+        className="py-3 px-4 h-auto" // Smaller card
       />
       
-      <div className="glass rounded-2xl overflow-hidden p-4 pb-6">
+      <div className="glass rounded-2xl overflow-hidden p-4 pb-10 h-[340px]"> {/* Increased height and bottom padding */}
         <Chart
           data={data}
           dataKey={dataKey as string}
@@ -80,6 +81,7 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
           title={`${title} Trend`}
           unit={isPercent ? '%' : ''}
           formatter={displayFormatter}
+          height={290} // Increased chart height
         />
       </div>
     </div>

@@ -39,15 +39,15 @@ const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div className={cn(
-      'glass p-6 rounded-2xl transition-all duration-300 h-full',
-      'hover:shadow-lg transform hover:-translate-y-1',
+      'glass transition-all duration-300',
+      'hover:shadow-lg transform hover:-translate-y-1 rounded-2xl',
       className
     )}>
-      <div className="flex flex-col space-y-2">
+      <div className="flex justify-between items-center">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         
         <div className="flex items-baseline space-x-2">
-          <span className="text-3xl font-semibold tracking-tight">
+          <span className="text-2xl font-semibold tracking-tight">
             <AnimatedNumber 
               value={value} 
               previousValue={previousValue}
@@ -58,21 +58,21 @@ const StatCard: React.FC<StatCardProps> = ({
           
           {change !== undefined && !isNeutral && (
             <span className={cn(
-              'inline-flex items-center text-sm font-medium',
+              'inline-flex items-center text-xs font-medium',
               isPositive ? 'text-green-600' : 'text-red-600',
             )}>
               {isPositive ? (
-                <ArrowUp className="w-3 h-3 mr-1" />
+                <ArrowUp className="w-3 h-3 mr-0.5" />
               ) : (
-                <ArrowDown className="w-3 h-3 mr-1" />
+                <ArrowDown className="w-3 h-3 mr-0.5" />
               )}
               {formattedChange}
             </span>
           )}
           
           {isNeutral && (
-            <span className="inline-flex items-center text-sm font-medium text-gray-500">
-              <Minus className="w-3 h-3 mr-1" />
+            <span className="inline-flex items-center text-xs font-medium text-gray-500">
+              <Minus className="w-3 h-3 mr-0.5" />
               No change
             </span>
           )}

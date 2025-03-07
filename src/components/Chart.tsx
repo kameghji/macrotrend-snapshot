@@ -64,7 +64,7 @@ const Chart: React.FC<ChartProps> = ({
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart
           data={data}
-          margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+          margin={{ top: 10, right: 10, left: 0, bottom: 40 }} // Increased bottom margin for x-axis
         >
           <defs>
             <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
@@ -79,7 +79,8 @@ const Chart: React.FC<ChartProps> = ({
             axisLine={{ stroke: '#e2e8f0' }} 
             tickLine={false}
             padding={{ left: 10, right: 10 }}
-            height={30}
+            height={40} // Increased height for x-axis
+            dy={10} // Add padding between axis and labels
           />
           <YAxis 
             tick={{ fontSize: 12, fill: '#94a3b8' }} 
