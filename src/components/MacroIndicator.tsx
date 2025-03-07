@@ -72,7 +72,7 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
         inverseTrend={inverseTrend}
       />
       
-      <div className="glass rounded-2xl overflow-hidden p-4">
+      <div className="glass rounded-2xl overflow-hidden p-4 pb-6">
         <Chart
           data={data}
           dataKey={dataKey as string}
