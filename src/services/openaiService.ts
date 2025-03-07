@@ -25,7 +25,7 @@ export interface EconomicDataResponse {
 export const fetchEconomicDataWithAI = async (
   apiKey: string,
   sources = {
-    inflation: "https://tradingeconomics.com/united-states/inflation-cpi",
+    inflation: "https://ycharts.com/indicators/us_inflation_rate",
     interest: "https://tradingeconomics.com/united-states/interest-rate",
     unemployment: "https://www.bls.gov/cps/",
     stockMarket: "https://finance.yahoo.com/markets/world-indices/"
