@@ -15,6 +15,7 @@ interface MacroIndicatorProps {
   formatter?: (value: number) => string;
   inverseTrend?: boolean;
   isLoading?: boolean;
+  isMockData?: boolean;
 }
 
 const MacroIndicator: React.FC<MacroIndicatorProps> = ({
@@ -27,6 +28,7 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
   formatter,
   inverseTrend = false,
   isLoading = false,
+  isMockData = false,
 }) => {
   if (isLoading) {
     return (
@@ -71,9 +73,13 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
         isPercent={isPercent || dataKey === 'stockIndex'}
         inverseTrend={inverseTrend}
         className="py-3 px-4 h-auto" // Smaller card
+        isMockData={isMockData}
       />
       
-      <div className="glass rounded-2xl overflow-hidden p-4 pb-10 h-[340px]"> {/* Increased height and bottom padding */}
+      <div className={cn(
+        "glass rounded-2xl overflow-hidden p-4 pb-10 h-[340px]", // Increased height and bottom padding
+        isMockData && "border border-dashed border-amber-300/50 bg-amber-50/10"
+      )}>
         <Chart
           data={data}
           dataKey={dataKey as string}

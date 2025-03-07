@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import AnimatedNumber from './AnimatedNumber';
-import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus, Database, GhostIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
@@ -14,6 +14,7 @@ interface StatCardProps {
   className?: string;
   isPercent?: boolean;
   inverseTrend?: boolean;
+  isMockData?: boolean;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -26,6 +27,7 @@ const StatCard: React.FC<StatCardProps> = ({
   className,
   isPercent = false,
   inverseTrend = false,
+  isMockData = false,
 }) => {
   // Format the change value
   const formattedChange = changeFormatFn 
@@ -41,13 +43,22 @@ const StatCard: React.FC<StatCardProps> = ({
     <div className={cn(
       'glass transition-all duration-300',
       'hover:shadow-lg transform hover:-translate-y-1 rounded-2xl',
+      isMockData && 'border border-dashed border-amber-300/50 bg-amber-50/10',
       className
     )}>
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+        <div className="flex items-center space-x-1">
+          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+          {isMockData && (
+            <GhostIcon className="h-3 w-3 text-amber-500 ml-1" title="Mock data" />
+          )}
+          {!isMockData && (
+            <Database className="h-3 w-3 text-green-500 ml-1" title="Real data" />
+          )}
+        </div>
         
         <div className="flex items-baseline space-x-2">
-          <span className="text-2xl font-semibold tracking-tight">
+          <span className={cn("text-2xl font-semibold tracking-tight", isMockData && "text-amber-700")}>
             <AnimatedNumber 
               value={value} 
               previousValue={previousValue}
@@ -60,6 +71,7 @@ const StatCard: React.FC<StatCardProps> = ({
             <span className={cn(
               'inline-flex items-center text-xs font-medium',
               isPositive ? 'text-green-600' : 'text-red-600',
+              isMockData && (isPositive ? 'text-green-600/70' : 'text-red-600/70'),
             )}>
               {isPositive ? (
                 <ArrowUp className="w-3 h-3 mr-0.5" />

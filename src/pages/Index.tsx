@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import MacroIndicator from '@/components/MacroIndicator';
@@ -5,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import useMacroData from '@/hooks/useMacroData';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, Database } from 'lucide-react';
+import { AlertCircle, Database, GhostIcon } from 'lucide-react';
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
@@ -55,6 +56,12 @@ const Index = () => {
                   Refreshing data...
                 </span>
               )}
+              {!isRealData && (
+                <span className="text-sm text-amber-600 flex items-center mr-2">
+                  <GhostIcon className="h-3 w-3 mr-1" />
+                  Mock Data
+                </span>
+              )}
               {isRealData && (
                 <span className="text-sm text-green-600 flex items-center">
                   <Database className="h-3 w-3 mr-1" />
@@ -72,6 +79,7 @@ const Index = () => {
               color="#f97316"
               isPercent
               isLoading={isLoading}
+              isMockData={!isRealData}
             />
             
             <MacroIndicator 
@@ -81,6 +89,7 @@ const Index = () => {
               color="#3b82f6"
               isPercent
               isLoading={isLoading}
+              isMockData={!isRealData}
             />
           </div>
           
@@ -93,6 +102,7 @@ const Index = () => {
               isPercent
               inverseTrend
               isLoading={isLoading}
+              isMockData={!isRealData}
             />
             
             <MacroIndicator 
@@ -102,6 +112,7 @@ const Index = () => {
               color="#10b981"
               formatter={(value) => value.toLocaleString()}
               isLoading={isLoading}
+              isMockData={!isRealData}
             />
           </div>
         </div>
@@ -122,15 +133,24 @@ const Index = () => {
               stockData.map((stock) => (
                 <div 
                   key={stock.symbol}
-                  className="glass p-6 rounded-2xl"
+                  className={cn(
+                    "glass p-6 rounded-2xl",
+                    !isRealData && "border border-dashed border-amber-300/50 bg-amber-50/10"
+                  )}
                 >
                   <div className="flex justify-between items-baseline mb-2">
-                    <h3 className="font-medium">{stock.name}</h3>
+                    <div className="flex items-center">
+                      <h3 className="font-medium">{stock.name}</h3>
+                      {!isRealData && <GhostIcon className="h-3 w-3 text-amber-500 ml-1" title="Mock data" />}
+                    </div>
                     <span className="text-sm text-muted-foreground">{stock.symbol}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-2xl font-semibold">{stock.price.toLocaleString()}</span>
-                    <span className={stock.change >= 0 ? "text-green-600" : "text-red-600"}>
+                    <span className={cn("text-2xl font-semibold", !isRealData && "text-amber-700")}>{stock.price.toLocaleString()}</span>
+                    <span className={cn(
+                      stock.change >= 0 ? "text-green-600" : "text-red-600",
+                      !isRealData && (stock.change >= 0 ? "text-green-600/70" : "text-red-600/70")
+                    )}>
                       {stock.change > 0 ? "+" : ""}{stock.change}%
                     </span>
                   </div>
