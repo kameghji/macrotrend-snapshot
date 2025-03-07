@@ -36,13 +36,13 @@ const fetchStockData = async (): Promise<StockData[]> => {
   return response.json();
 };
 
-// Generate mock data with current month
+// Generate mock data starting from current month backward
 const generateMockData = (): MacroData[] => {
   const now = new Date();
   const months = [];
   
-  // Generate data for the last 5 months including current month
-  for (let i = 4; i >= 0; i--) {
+  // Generate data for the current month and 4 months back (5 months total)
+  for (let i = 0; i < 5; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     
@@ -58,7 +58,8 @@ const generateMockData = (): MacroData[] => {
     });
   }
   
-  return months;
+  // Reverse the array so it goes from oldest to newest (for chart display)
+  return months.reverse();
 };
 
 // Calculate trends between the latest two data points

@@ -39,6 +39,8 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
 
   if (!data || data.length === 0) return null;
 
+  // Data is already ordered from oldest to newest for chart display
+  // Get the latest values (from the end of the array)
   const latestValue = data[data.length - 1][dataKey] as number;
   const previousValue = data.length > 1 ? data[data.length - 2][dataKey] as number : undefined;
   const change = previousValue !== undefined ? latestValue - previousValue : undefined;

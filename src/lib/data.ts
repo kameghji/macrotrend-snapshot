@@ -8,44 +8,34 @@ export interface MacroData {
   stockIndex: number;
 }
 
-// Historical mock data (will be replaced by API call)
-export const macroData: MacroData[] = [
-  {
-    date: "Jul 2024",
-    inflation: 3.1,
-    interest: 5.5,
-    unemployment: 4.3,
-    stockIndex: 5600,
-  },
-  {
-    date: "Aug 2024",
-    inflation: 3.0,
-    interest: 5.5,
-    unemployment: 4.2,
-    stockIndex: 5650,
-  },
-  {
-    date: "Sep 2024",
-    inflation: 2.9,
-    interest: 5.25,
-    unemployment: 4.1,
-    stockIndex: 5800,
-  },
-  {
-    date: "Oct 2024",
-    inflation: 2.8,
-    interest: 5.0,
-    unemployment: 4.0,
-    stockIndex: 5900,
-  },
-  {
-    date: "Nov 2024",
-    inflation: 2.7,
-    interest: 4.75,
-    unemployment: 3.9,
-    stockIndex: 6100,
+// Generate mock data starting from current month and going backward
+const generateHistoricalData = (): MacroData[] => {
+  const now = new Date();
+  const result: MacroData[] = [];
+  
+  // Generate data for the current month and 4 months back (5 months total)
+  for (let i = 0; i < 5; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    
+    // Generate realistic but random variations
+    const randomVariation = () => (Math.random() * 0.2) - 0.1; // -0.1 to +0.1
+    
+    result.push({
+      date: monthYear,
+      inflation: 2.7 + randomVariation(),
+      interest: 4.75 + randomVariation() * 2,
+      unemployment: 3.9 + randomVariation(),
+      stockIndex: 6100 + Math.floor(randomVariation() * 500),
+    });
   }
-];
+  
+  // Reverse the array so it goes from oldest to newest (for chart display)
+  return result.reverse();
+};
+
+// Historical mock data (generated from current month backward)
+export const macroData: MacroData[] = generateHistoricalData();
 
 // Calculate trends and changes
 export const calculateTrends = (data: MacroData[]) => {
