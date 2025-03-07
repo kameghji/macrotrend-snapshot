@@ -48,7 +48,10 @@ const StatCard: React.FC<StatCardProps> = ({
     )}>
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-1">
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+          <h3 className={cn(
+            "text-sm font-medium",
+            isMockData ? "text-gray-500" : "text-muted-foreground"
+          )}>{title}</h3>
           {isMockData && (
             <span className="inline-flex items-center tooltip" aria-label="Mock data">
               <GhostIcon className="h-3 w-3 text-amber-500 ml-1" />
@@ -62,7 +65,10 @@ const StatCard: React.FC<StatCardProps> = ({
         </div>
         
         <div className="flex items-baseline space-x-2">
-          <span className={cn("text-2xl font-semibold tracking-tight", isMockData && "text-amber-700")}>
+          <span className={cn(
+            "text-2xl font-semibold tracking-tight", 
+            isMockData ? "text-gray-600" : ""
+          )}>
             <AnimatedNumber 
               value={value} 
               previousValue={previousValue}
@@ -74,8 +80,9 @@ const StatCard: React.FC<StatCardProps> = ({
           {change !== undefined && !isNeutral && (
             <span className={cn(
               'inline-flex items-center text-xs font-medium',
-              isPositive ? 'text-green-600' : 'text-red-600',
-              isMockData && (isPositive ? 'text-green-600/70' : 'text-red-600/70'),
+              isPositive 
+                ? (isMockData ? 'text-green-600/50' : 'text-green-600') 
+                : (isMockData ? 'text-red-600/50' : 'text-red-600'),
             )}>
               {isPositive ? (
                 <ArrowUp className="w-3 h-3 mr-0.5" />
@@ -87,7 +94,10 @@ const StatCard: React.FC<StatCardProps> = ({
           )}
           
           {isNeutral && (
-            <span className="inline-flex items-center text-xs font-medium text-gray-500">
+            <span className={cn(
+              "inline-flex items-center text-xs font-medium",
+              isMockData ? "text-gray-400" : "text-gray-500"
+            )}>
               <Minus className="w-3 h-3 mr-0.5" />
               No change
             </span>

@@ -140,20 +140,30 @@ const Index = () => {
                 >
                   <div className="flex justify-between items-baseline mb-2">
                     <div className="flex items-center">
-                      <h3 className="font-medium">{stock.name}</h3>
+                      <h3 className={cn(
+                        "font-medium",
+                        !isRealData && "text-gray-600"
+                      )}>{stock.name}</h3>
                       {!isRealData && (
                         <span className="inline-flex items-center tooltip" aria-label="Mock data">
                           <GhostIcon className="h-3 w-3 text-amber-500 ml-1" />
                         </span>
                       )}
                     </div>
-                    <span className="text-sm text-muted-foreground">{stock.symbol}</span>
+                    <span className={cn(
+                      "text-sm",
+                      !isRealData ? "text-gray-500" : "text-muted-foreground"
+                    )}>{stock.symbol}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className={cn("text-2xl font-semibold", !isRealData && "text-amber-700")}>{stock.price.toLocaleString()}</span>
                     <span className={cn(
-                      stock.change >= 0 ? "text-green-600" : "text-red-600",
-                      !isRealData && (stock.change >= 0 ? "text-green-600/70" : "text-red-600/70")
+                      "text-2xl font-semibold", 
+                      !isRealData && "text-gray-600"
+                    )}>{stock.price.toLocaleString()}</span>
+                    <span className={cn(
+                      !isRealData 
+                        ? (stock.change >= 0 ? "text-green-600/50" : "text-red-600/50")
+                        : (stock.change >= 0 ? "text-green-600" : "text-red-600")
                     )}>
                       {stock.change > 0 ? "+" : ""}{stock.change}%
                     </span>
