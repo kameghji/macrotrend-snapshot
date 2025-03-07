@@ -1,5 +1,5 @@
 
-// Mock data for macroeconomic indicators from July 2024
+// Types for macroeconomic indicators
 export interface MacroData {
   date: string;
   inflation: number;
@@ -8,6 +8,7 @@ export interface MacroData {
   stockIndex: number;
 }
 
+// Historical mock data (will be replaced by API call)
 export const macroData: MacroData[] = [
   {
     date: "Jul 2024",
@@ -94,7 +95,7 @@ export const formatCurrency = (num: number) => {
   }).format(num);
 };
 
-// Stock market data
+// Stock market data types
 export interface StockData {
   name: string;
   symbol: string;
@@ -102,6 +103,7 @@ export interface StockData {
   change: number;
 }
 
+// Mock stock data (will be replaced by API call)
 export const stockData: StockData[] = [
   { name: "S&P 500", symbol: "SPX", price: 6100, change: 1.2 },
   { name: "Dow Jones", symbol: "DJI", price: 41500, change: 0.8 },

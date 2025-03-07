@@ -14,6 +14,7 @@ interface MacroIndicatorProps {
   isPercent?: boolean;
   formatter?: (value: number) => string;
   inverseTrend?: boolean;
+  isLoading?: boolean;
 }
 
 const MacroIndicator: React.FC<MacroIndicatorProps> = ({
@@ -25,7 +26,17 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
   isPercent = false,
   formatter,
   inverseTrend = false,
+  isLoading = false,
 }) => {
+  if (isLoading) {
+    return (
+      <div className={cn('flex flex-col space-y-4', className)}>
+        <div className="glass animate-pulse rounded-2xl p-5 h-24"></div>
+        <div className="glass animate-pulse rounded-2xl overflow-hidden p-4 h-[300px]"></div>
+      </div>
+    );
+  }
+
   if (!data || data.length === 0) return null;
 
   const latestValue = data[data.length - 1][dataKey] as number;
