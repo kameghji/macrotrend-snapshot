@@ -5,7 +5,20 @@ export interface MacroData {
   inflation: number;
   interest: number;
   unemployment: number;
-  stockIndex: number;
+  consumerSentiment: number;
+}
+
+// Type for tech company data
+export interface TechCompanyData {
+  name: string;
+  ticker: string;
+  currentPrice: number;
+  priceJan1: number;
+  priceChange: number;
+  revenue: string;
+  revenueGrowth: number;
+  earningsDate: string;
+  peRatio: number;
 }
 
 // Generate mock data starting from current month and going backward
@@ -26,12 +39,95 @@ const generateHistoricalData = (): MacroData[] => {
       inflation: 2.7 + randomVariation(),
       interest: 4.75 + randomVariation() * 2,
       unemployment: 3.9 + randomVariation(),
-      stockIndex: 6100 + Math.floor(randomVariation() * 500),
+      consumerSentiment: 65.5 + randomVariation() * 5,
     });
   }
   
   // Reverse the array so it goes from oldest to newest (for chart display)
   return result.reverse();
+};
+
+// Generate mock tech company data
+export const generateMockTechCompanyData = (): TechCompanyData[] => {
+  return [
+    {
+      name: "Amazon (AWS)",
+      ticker: "AMZN",
+      currentPrice: 185.25,
+      priceJan1: 151.16,
+      priceChange: 22.55,
+      revenue: "$143.3B",
+      revenueGrowth: 12.5,
+      earningsDate: "July 25, 2024",
+      peRatio: 44.2
+    },
+    {
+      name: "Google Cloud",
+      ticker: "GOOGL",
+      currentPrice: 176.80,
+      priceJan1: 138.45,
+      priceChange: 27.7,
+      revenue: "$86.3B",
+      revenueGrowth: 15.8,
+      earningsDate: "July 23, 2024",
+      peRatio: 23.4
+    },
+    {
+      name: "ServiceNow",
+      ticker: "NOW",
+      currentPrice: 754.45,
+      priceJan1: 706.20,
+      priceChange: 6.83,
+      revenue: "$8.97B",
+      revenueGrowth: 23.5,
+      earningsDate: "July 24, 2024",
+      peRatio: 80.5
+    },
+    {
+      name: "Snowflake",
+      ticker: "SNOW",
+      currentPrice: 125.60,
+      priceJan1: 198.75,
+      priceChange: -36.80,
+      revenue: "$2.85B",
+      revenueGrowth: 35.8,
+      earningsDate: "August 21, 2024",
+      peRatio: 0 // No P/E as they're not profitable yet
+    },
+    {
+      name: "Microsoft",
+      ticker: "MSFT",
+      currentPrice: 425.35,
+      priceJan1: 376.04,
+      priceChange: 13.11,
+      revenue: "$236.5B",
+      revenueGrowth: 13.7,
+      earningsDate: "July 23, 2024",
+      peRatio: 36.8
+    },
+    {
+      name: "Palo Alto Networks",
+      ticker: "PANW",
+      currentPrice: 316.20,
+      priceJan1: 294.88,
+      priceChange: 7.23,
+      revenue: "$7.21B",
+      revenueGrowth: 24.9,
+      earningsDate: "August 19, 2024",
+      peRatio: 45.7
+    },
+    {
+      name: "CrowdStrike",
+      ticker: "CRWD",
+      currentPrice: 245.15,
+      priceJan1: 254.33,
+      priceChange: -3.61,
+      revenue: "$3.06B",
+      revenueGrowth: 33.6,
+      earningsDate: "August 28, 2024",
+      peRatio: 128.3
+    }
+  ];
 };
 
 // Historical mock data (generated from current month backward)
@@ -60,10 +156,10 @@ export const calculateTrends = (data: MacroData[]) => {
       previous: previous.unemployment,
       change: latest.unemployment - previous.unemployment,
     },
-    stockIndex: {
-      current: latest.stockIndex,
-      previous: previous.stockIndex,
-      change: ((latest.stockIndex - previous.stockIndex) / previous.stockIndex) * 100,
+    consumerSentiment: {
+      current: latest.consumerSentiment,
+      previous: previous.consumerSentiment,
+      change: ((latest.consumerSentiment - previous.consumerSentiment) / previous.consumerSentiment) * 100,
     }
   };
 };
@@ -100,3 +196,6 @@ export const stockData: StockData[] = [
   { name: "NASDAQ", symbol: "IXIC", price: 19200, change: 1.5 },
   { name: "Russell 2000", symbol: "RUT", price: 2300, change: -0.4 }
 ];
+
+// Mock tech company data
+export const techCompanyData: TechCompanyData[] = generateMockTechCompanyData();

@@ -1,5 +1,6 @@
+
 import { useQuery } from '@tanstack/react-query';
-import { MacroData, StockData } from '@/lib/data';
+import { MacroData, StockData, TechCompanyData, generateMockTechCompanyData } from '@/lib/data';
 import { fetchEconomicDataWithAI } from '@/services/openaiService';
 import { useState, useCallback } from 'react';
 
@@ -21,7 +22,7 @@ const generateMockData = (): MacroData[] => {
       inflation: 2.7 + randomVariation(),
       interest: 4.75 + randomVariation() * 2,
       unemployment: 3.9 + randomVariation(),
-      stockIndex: 6100 + Math.floor(randomVariation() * 500),
+      consumerSentiment: 65.5 + randomVariation() * 5,
     });
   }
   
@@ -62,10 +63,10 @@ export const calculateTrends = (data: MacroData[]) => {
       previous: previous.unemployment,
       change: latest.unemployment - previous.unemployment,
     },
-    stockIndex: {
-      current: latest.stockIndex,
-      previous: previous.stockIndex,
-      change: ((latest.stockIndex - previous.stockIndex) / previous.stockIndex) * 100,
+    consumerSentiment: {
+      current: latest.consumerSentiment,
+      previous: previous.consumerSentiment,
+      change: ((latest.consumerSentiment - previous.consumerSentiment) / previous.consumerSentiment) * 100,
     }
   };
 };
@@ -83,17 +84,25 @@ const fetchMockStockData = async (): Promise<StockData[]> => {
   return generateMockStockData();
 };
 
+const fetchMockTechCompaniesData = async (): Promise<TechCompanyData[]> => {
+  // Simulate a small delay to mimic network request
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return generateMockTechCompanyData();
+};
+
 // The actual data fetching function that tries to use OpenAI first
 const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   macroData: MacroData[];
   stockData: StockData[];
+  techCompanies: TechCompanyData[];
 }> => {
   // If no API key is provided, fall back to mock data
   if (!apiKey) {
     console.log("No API key provided, using mock data");
     return {
       macroData: await fetchMockMacroData(),
-      stockData: await fetchMockStockData()
+      stockData: await fetchMockStockData(),
+      techCompanies: await fetchMockTechCompaniesData()
     };
   }
 
@@ -101,7 +110,7 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
     console.log("Fetching real economic data with OpenAI");
     const result = await fetchEconomicDataWithAI(apiKey);
     
-    if (!result.success || !result.macroData.length || !result.stockData.length) {
+    if (!result.success || !result.macroData.length) {
       console.log("Failed to fetch real data:", result.error);
       throw new Error(result.error || "Failed to fetch data");
     }
@@ -109,13 +118,15 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
     console.log("Successfully fetched real economic data");
     return {
       macroData: result.macroData,
-      stockData: result.stockData
+      stockData: result.stockData,
+      techCompanies: result.techCompanies
     };
   } catch (error) {
     console.error("Error fetching real data, falling back to mock data:", error);
     return {
       macroData: await fetchMockMacroData(),
-      stockData: await fetchMockStockData()
+      stockData: await fetchMockStockData(),
+      techCompanies: await fetchMockTechCompaniesData()
     };
   }
 };
@@ -149,6 +160,7 @@ export const useMacroData = () => {
   return { 
     macroData: data?.macroData || [],
     stockData: data?.stockData || [],
+    techCompanies: data?.techCompanies || [],
     trends,
     isLoading,
     error,

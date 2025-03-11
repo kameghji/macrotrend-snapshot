@@ -1,6 +1,6 @@
 
 import OpenAI from 'openai';
-import { MacroData, StockData } from '@/lib/data';
+import { MacroData, StockData, TechCompanyData } from '@/lib/data';
 
 // OpenAI client
 let openaiClient: OpenAI | null = null;
@@ -18,6 +18,7 @@ const initializeOpenAI = (apiKey: string): OpenAI => {
 export interface EconomicDataResponse {
   macroData: MacroData[];
   stockData: StockData[];
+  techCompanies: TechCompanyData[];
   success: boolean;
   error?: string;
 }
@@ -28,7 +29,8 @@ export const fetchEconomicDataWithAI = async (
     inflation: "https://ycharts.com/indicators/us_inflation_rate",
     interest: "https://tradingeconomics.com/united-states/interest-rate",
     unemployment: "https://www.bls.gov/cps/",
-    stockMarket: "https://finance.yahoo.com/markets/world-indices/"
+    stockMarket: "https://finance.yahoo.com/markets/world-indices/",
+    techCompanies: "https://finance.yahoo.com/"
   }
 ): Promise<EconomicDataResponse> => {
   try {
@@ -36,22 +38,27 @@ export const fetchEconomicDataWithAI = async (
     
     // Format the prompt with the sources to analyze
     const prompt = `
-    I need the latest economic data from the United States.
+    I need the latest economic data from the United States and tech company financial information.
     
     Please extract the following data points from these specific sources:
     1. Inflation Rate (CPI) from ${sources.inflation}
     2. Federal Reserve Interest Rate from ${sources.interest}
     3. Unemployment Rate from ${sources.unemployment}
-    4. Major Market Indices (S&P 500, Dow Jones, NASDAQ, Russell 2000) from ${sources.stockMarket}
+    4. Consumer Sentiment Index from ${sources.stockMarket}
+    5. Tech company financial data from ${sources.techCompanies} for AWS, Google Cloud, ServiceNow, Snowflake, Microsoft, Palo Alto Networks, and CrowdStrike
     
-    For each economic indicator (inflation, interest, unemployment), provide:
+    For each economic indicator (inflation, interest, unemployment, consumer sentiment), provide:
     - The current rate (latest month)
     - Historical data for the previous 4 months (5 months total including current)
     - The month and year for each data point
     
-    For the stock market indices, provide:
-    - Current value
-    - Percentage change
+    For the tech companies, provide:
+    - Current stock price
+    - Revenue
+    - Revenue year-over-year growth (as percentage)
+    - Next earnings date
+    - Stock price on January 1st of the current year
+    - Price-to-Earnings (P/E) ratio
     
     Format your response as a JSON object with this exact structure:
     {
@@ -61,18 +68,23 @@ export const fetchEconomicDataWithAI = async (
           "inflation": number,
           "interest": number,
           "unemployment": number,
-          "stockIndex": number
+          "consumerSentiment": number
         },
         // 5 months total, ordered from oldest to newest
       ],
-      "stockData": [
+      "techCompanies": [
         {
-          "name": "Index Name",
-          "symbol": "Symbol",
-          "price": number,
-          "change": number
+          "name": "Company Name",
+          "ticker": "Symbol",
+          "currentPrice": number,
+          "priceJan1": number,
+          "priceChange": number,
+          "revenue": string,
+          "revenueGrowth": number,
+          "earningsDate": "Date",
+          "peRatio": number
         },
-        // 4 indices total
+        // 7 companies total
       ]
     }
     
@@ -84,7 +96,7 @@ export const fetchEconomicDataWithAI = async (
       messages: [
         {
           role: "system",
-          content: "You are an economic data analyst assistant. Extract accurate economic data from provided sources and format it precisely as requested."
+          content: "You are an economic data analyst assistant. Extract accurate economic and financial data from provided sources and format it precisely as requested."
         },
         {
           role: "user",
@@ -104,13 +116,14 @@ export const fetchEconomicDataWithAI = async (
     const data = JSON.parse(content);
     
     // Validate the response structure
-    if (!data.macroData || !Array.isArray(data.macroData) || !data.stockData || !Array.isArray(data.stockData)) {
+    if (!data.macroData || !Array.isArray(data.macroData) || !data.techCompanies || !Array.isArray(data.techCompanies)) {
       throw new Error("Invalid data structure returned from OpenAI");
     }
 
     return {
       macroData: data.macroData,
-      stockData: data.stockData,
+      stockData: [], // We're not using this anymore, but keeping for backward compatibility
+      techCompanies: data.techCompanies,
       success: true
     };
   } catch (error) {
@@ -118,6 +131,7 @@ export const fetchEconomicDataWithAI = async (
     return {
       macroData: [],
       stockData: [],
+      techCompanies: [],
       success: false,
       error: error instanceof Error ? error.message : "Unknown error occurred"
     };
