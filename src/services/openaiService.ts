@@ -26,10 +26,10 @@ export interface EconomicDataResponse {
 export const fetchEconomicDataWithAI = async (
   apiKey: string,
   sources = {
-    inflation: "https://ycharts.com/indicators/us_inflation_rate",
+    inflation: "https://tradingeconomics.com/united-states/inflation-cpi",
     interest: "https://tradingeconomics.com/united-states/interest-rate",
-    unemployment: "https://www.bls.gov/cps/",
-    stockMarket: "https://finance.yahoo.com/markets/world-indices/",
+    unemployment: "https://tradingeconomics.com/united-states/unemployment-rate",
+    stockMarket: "https://tradingeconomics.com/united-states/consumer-confidence",
     techCompanies: "https://finance.yahoo.com/"
   }
 ): Promise<EconomicDataResponse> => {
@@ -38,23 +38,30 @@ export const fetchEconomicDataWithAI = async (
     
     // Format the prompt with the sources to analyze
     const prompt = `
-    I need the latest economic data from the United States and tech company financial information.
+    I need the most accurate, up-to-date economic data from the United States and tech company financial information.
     
-    Please extract the following data points from these specific sources:
-    1. Inflation Rate (CPI) from ${sources.inflation}
-    2. Federal Reserve Interest Rate from ${sources.interest}
-    3. Unemployment Rate from ${sources.unemployment}
-    4. Consumer Sentiment Index from ${sources.stockMarket}
-    5. Tech company financial data from ${sources.techCompanies} for AWS, Google Cloud, ServiceNow, Snowflake, Microsoft, Palo Alto Networks, and CrowdStrike
+    Please extract the following data points from these specific sources (and use other reliable sources if needed):
+    1. Current US Inflation Rate (CPI) from ${sources.inflation}
+    2. Current Federal Reserve Interest Rate from ${sources.interest}
+    3. Current US Unemployment Rate from ${sources.unemployment}
+    4. Current Consumer Sentiment Index from ${sources.stockMarket}
+    5. Tech company financial data from ${sources.techCompanies} (or any reliable financial source) for:
+       - Amazon (AWS)
+       - Google Cloud
+       - ServiceNow
+       - Snowflake
+       - Microsoft
+       - Palo Alto Networks
+       - CrowdStrike
     
     For each economic indicator (inflation, interest, unemployment, consumer sentiment), provide:
     - The current rate (latest month)
     - Historical data for the previous 4 months (5 months total including current)
     - The month and year for each data point
     
-    For the tech companies, provide:
+    For the tech companies, provide the most accurate and up-to-date information for:
     - Current stock price
-    - Revenue
+    - Revenue (most recent quarterly or annual)
     - Revenue year-over-year growth (as percentage)
     - Next earnings date
     - Stock price on January 1st of the current year
@@ -88,7 +95,7 @@ export const fetchEconomicDataWithAI = async (
       ]
     }
     
-    Only return the JSON object, nothing else. Ensure the data is up-to-date and accurate as of today.
+    Only return the JSON object, nothing else. Ensure the data is highly accurate, up-to-date, and factual as of the current date. Check multiple sources if needed to confirm the accuracy of the information.
     `;
 
     const response = await client.chat.completions.create({
@@ -96,14 +103,14 @@ export const fetchEconomicDataWithAI = async (
       messages: [
         {
           role: "system",
-          content: "You are an economic data analyst assistant. Extract accurate economic and financial data from provided sources and format it precisely as requested. Use the most recent data available."
+          content: "You are a precise economic data analyst assistant. Extract accurate, real economic and financial data from trusted sources. Double-check your numbers against multiple sources when possible. Format exactly as requested using only verified, factual information. Your output must include accurate, current figures for all requested data points."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.1, // Lower temperature for more deterministic responses
+      temperature: 0.0, // Set to 0 for maximum determinism and factuality
       response_format: { type: "json_object" }
     });
 
@@ -119,6 +126,9 @@ export const fetchEconomicDataWithAI = async (
     if (!data.macroData || !Array.isArray(data.macroData) || !data.techCompanies || !Array.isArray(data.techCompanies)) {
       throw new Error("Invalid data structure returned from OpenAI");
     }
+
+    // Log the data received for debugging
+    console.log("Data received from OpenAI:", JSON.stringify(data, null, 2));
 
     return {
       macroData: data.macroData,

@@ -105,8 +105,14 @@ export const useMacroData = () => {
     const savedKey = localStorage.getItem('openai_api_key');
     if (savedKey && savedKey !== apiKey) {
       setApiKey(savedKey);
+    } else if (!savedKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please provide an OpenAI API key to get real-time economic data.",
+        variant: "default",
+      });
     }
-  }, [apiKey]);
+  }, [apiKey, toast]);
   
   // Fetch economic data with react-query
   const { 
@@ -117,7 +123,7 @@ export const useMacroData = () => {
   } = useQuery({
     queryKey: ['economicData', apiKey],
     queryFn: () => fetchRealEconomicData(apiKey),
-    staleTime: 3600000, // 1 hour in milliseconds
+    staleTime: 1800000, // 30 minutes in milliseconds
     refetchOnWindowFocus: false,
   });
   

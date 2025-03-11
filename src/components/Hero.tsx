@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { formatPercent } from '@/lib/data';
 import { RefreshCw, Database } from 'lucide-react';
 import ApiKeyForm from './ApiKeyForm';
 import { Button } from '@/components/ui/button';
