@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Database } from 'lucide-react';
+import { RefreshCw, Database, AlertTriangle } from 'lucide-react';
 import ApiKeyForm from './ApiKeyForm';
 import { Button } from '@/components/ui/button';
 import useMacroData from '@/hooks/useMacroData';
@@ -11,7 +11,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { isLoading, isRealData, updateApiKey, refetchData } = useMacroData();
+  const { isLoading, isRealData, updateApiKey, refetchData, error } = useMacroData();
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -50,8 +50,24 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
             <p className="text-xl text-muted-foreground max-w-3xl">
               {isRealData 
                 ? "Live data from Trading Economics, BLS, and Yahoo Finance via OpenAI"
-                : "Please provide an OpenAI API key to view live economic data"}
+                : "Using mock data for demonstration purposes"}
             </p>
+            
+            {error && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-amber-800">API Error Detected</p>
+                  <p className="text-sm text-amber-700">
+                    {error.type === "quota_exceeded" 
+                      ? "Your OpenAI API key has exceeded its quota. To see real data, please update your API key or check your OpenAI account billing."
+                      : error.type === "invalid_key"
+                        ? "Your OpenAI API key appears to be invalid. Please check the key and try again."
+                        : "Could not connect to OpenAI API. Displaying mock data instead."}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

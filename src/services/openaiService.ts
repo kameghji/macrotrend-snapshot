@@ -21,6 +21,7 @@ export interface EconomicDataResponse {
   techCompanies: TechCompanyData[];
   success: boolean;
   error?: string;
+  errorType?: string;
 }
 
 export const fetchEconomicDataWithAI = async (
@@ -34,6 +35,7 @@ export const fetchEconomicDataWithAI = async (
   }
 ): Promise<EconomicDataResponse> => {
   try {
+    console.log("Initializing OpenAI client with provided API key");
     const client = initializeOpenAI(apiKey);
     
     // Format the prompt with the sources to analyze
@@ -98,6 +100,7 @@ export const fetchEconomicDataWithAI = async (
     Only return the JSON object, nothing else. Ensure the data is highly accurate, up-to-date, and factual as of the current date. Check multiple sources if needed to confirm the accuracy of the information.
     `;
 
+    console.log("Sending data request to OpenAI...");
     const response = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -128,7 +131,9 @@ export const fetchEconomicDataWithAI = async (
     }
 
     // Log the data received for debugging
-    console.log("Data received from OpenAI:", JSON.stringify(data, null, 2));
+    console.log("Successfully received data from OpenAI");
+    console.log("Sample macro data point:", data.macroData[data.macroData.length - 1]);
+    console.log("Sample tech company:", data.techCompanies[0]);
 
     return {
       macroData: data.macroData,
@@ -138,12 +143,29 @@ export const fetchEconomicDataWithAI = async (
     };
   } catch (error) {
     console.error("Error fetching economic data with AI:", error);
+    
+    // Identify specific error types for better user messaging
+    let errorType = "unknown";
+    let errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    
+    // Check for quota exceeded errors
+    if (errorMessage.includes("exceeded your current quota") || errorMessage.includes("429")) {
+      errorType = "quota_exceeded";
+      errorMessage = "Your OpenAI API key has exceeded its quota. Please check your OpenAI account billing or try a different API key.";
+    } 
+    // Check for invalid API key
+    else if (errorMessage.includes("Incorrect API key") || errorMessage.includes("401")) {
+      errorType = "invalid_key";
+      errorMessage = "Your OpenAI API key appears to be invalid. Please check the key and try again.";
+    }
+    
     return {
       macroData: [],
       stockData: [],
       techCompanies: [],
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
+      error: errorMessage,
+      errorType: errorType
     };
   }
 };

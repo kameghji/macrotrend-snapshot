@@ -46,6 +46,9 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   macroData: MacroData[];
   stockData: StockData[];
   techCompanies: TechCompanyData[];
+  errorMessage?: string;
+  errorType?: string;
+  isUsingMockData: boolean;
 }> => {
   // If no API key is provided, fall back to mock data
   if (!apiKey) {
@@ -53,7 +56,8 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
     return {
       macroData: await generateMockData(),
       stockData: await generateMockStockData(),
-      techCompanies: await generateMockTechCompanyData()
+      techCompanies: await generateMockTechCompanyData(),
+      isUsingMockData: true
     };
   }
 
@@ -70,14 +74,34 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
     return {
       macroData: result.macroData,
       stockData: result.stockData,
-      techCompanies: result.techCompanies
+      techCompanies: result.techCompanies,
+      isUsingMockData: false
     };
   } catch (error) {
     console.error("Error fetching real data, falling back to mock data:", error);
+    
+    // Extract error details
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    let errorType = "unknown";
+    
+    // Check specific error types from the openaiService
+    if (error instanceof Error && "errorType" in error) {
+      errorType = (error as any).errorType;
+    }
+    // Or detect common error patterns in the message
+    else if (errorMessage.includes("exceeded") || errorMessage.includes("quota") || errorMessage.includes("429")) {
+      errorType = "quota_exceeded";
+    } else if (errorMessage.includes("invalid") || errorMessage.includes("incorrect") || errorMessage.includes("401")) {
+      errorType = "invalid_key";
+    }
+    
     return {
       macroData: await generateMockData(),
       stockData: await generateMockStockData(),
-      techCompanies: await generateMockTechCompanyData()
+      techCompanies: await generateMockTechCompanyData(),
+      errorMessage: errorMessage,
+      errorType: errorType,
+      isUsingMockData: true
     };
   }
 };
@@ -87,12 +111,18 @@ export const useMacroData = () => {
   const [apiKey, setApiKey] = useState<string | null>(
     localStorage.getItem('openai_api_key')
   );
+  const [errorDetails, setErrorDetails] = useState<{
+    message: string;
+    type: string;
+  } | null>(null);
   
   // Function to update the API key
   const updateApiKey = useCallback((newApiKey: string) => {
     if (newApiKey) {
       localStorage.setItem('openai_api_key', newApiKey);
       setApiKey(newApiKey);
+      // Clear any previous errors when setting a new key
+      setErrorDetails(null);
       toast({
         title: "API Key Updated",
         description: "Your OpenAI API key has been saved. Fetching live data...",
@@ -125,14 +155,48 @@ export const useMacroData = () => {
     queryFn: () => fetchRealEconomicData(apiKey),
     staleTime: 1800000, // 30 minutes in milliseconds
     refetchOnWindowFocus: false,
+    retry: 1, // Only retry once to avoid excessive API calls on quota issues
   });
   
-  // Show error toast if data fetching fails
+  // Track if we're using mock data and update error details
+  useEffect(() => {
+    if (data?.isUsingMockData && data.errorMessage) {
+      setErrorDetails({
+        message: data.errorMessage,
+        type: data.errorType || "unknown"
+      });
+      
+      // Show appropriate toast based on error type
+      if (data.errorType === "quota_exceeded") {
+        toast({
+          title: "API Quota Exceeded",
+          description: "Your OpenAI API key has exceeded its quota. Using mock data instead.",
+          variant: "destructive",
+        });
+      } else if (data.errorType === "invalid_key") {
+        toast({
+          title: "Invalid API Key",
+          description: "The OpenAI API key appears to be invalid. Using mock data instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error loading data",
+          description: "Could not fetch live economic data. Using mock data instead.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      setErrorDetails(null);
+    }
+  }, [data, toast]);
+  
+  // Show error toast if data fetching fails completely
   useEffect(() => {
     if (error && apiKey) {
       toast({
         title: "Error loading data",
-        description: "Could not fetch live economic data. Using mock data instead.",
+        description: "Could not fetch economic data. Please try again later.",
         variant: "destructive",
       });
     }
@@ -147,8 +211,8 @@ export const useMacroData = () => {
     techCompanies: data?.techCompanies || [],
     trends,
     isLoading,
-    error,
-    isRealData: !!apiKey,
+    error: errorDetails,
+    isRealData: !!apiKey && !data?.isUsingMockData,
     updateApiKey,
     refetchData: refetch
   };
