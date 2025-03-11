@@ -47,16 +47,16 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
   const previousValue = data.length > 1 ? data[data.length - 2][dataKey] as number : undefined;
   const change = previousValue !== undefined ? latestValue - previousValue : undefined;
 
-  // For stock index, we want percentage change
-  const percentChange = previousValue !== undefined && dataKey === 'stockIndex'
+  // For consumer sentiment, we want percentage change
+  const percentChange = previousValue !== undefined && dataKey === 'consumerSentiment'
     ? ((latestValue - previousValue) / previousValue) * 100
     : change;
 
-  const displayChange = dataKey === 'stockIndex' ? percentChange : change;
+  const displayChange = dataKey === 'consumerSentiment' ? percentChange : change;
 
   const defaultFormatter = (value: number) => {
     if (isPercent) return value.toFixed(1) + '%';
-    if (dataKey === 'stockIndex') return value.toLocaleString();
+    if (dataKey === 'consumerSentiment') return value.toLocaleString();
     return value.toString();
   };
 
@@ -70,7 +70,7 @@ const MacroIndicator: React.FC<MacroIndicatorProps> = ({
         previousValue={previousValue}
         change={displayChange}
         formatFn={displayFormatter}
-        isPercent={isPercent || dataKey === 'stockIndex'}
+        isPercent={isPercent || dataKey === 'consumerSentiment'}
         inverseTrend={inverseTrend}
         className="py-3 px-4 h-auto" // Smaller card
         isMockData={isMockData}

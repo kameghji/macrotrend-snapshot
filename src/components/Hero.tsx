@@ -43,7 +43,7 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
     inflation: { current: 0, previous: 0, change: 0 },
     interest: { current: 0, previous: 0, change: 0 },
     unemployment: { current: 0, previous: 0, change: 0 },
-    stockIndex: { current: 0, previous: 0, change: 0 }
+    consumerSentiment: { current: 0, previous: 0, change: 0 }  // Changed from stockIndex to consumerSentiment
   };
 
   // Use actual trends or placeholder based on loading state
@@ -155,14 +155,14 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
                 <div className="flex items-baseline space-x-2">
                   <span className="text-3xl font-semibold">
                     <AnimatedNumber 
-                      value={displayTrends.stockIndex.current} 
+                      value={displayTrends.consumerSentiment.current} 
                       formatFn={(v) => v.toLocaleString()} 
                     />
                   </span>
-                  <span className={cn("flex items-center text-sm", getColor(displayTrends.stockIndex.change))}>
-                    {getArrow(displayTrends.stockIndex.change)}
-                    {displayTrends.stockIndex.change > 0 ? '+' : ''}
-                    {displayTrends.stockIndex.change.toFixed(1)}%
+                  <span className={cn("flex items-center text-sm", getColor(displayTrends.consumerSentiment.change))}>
+                    {getArrow(displayTrends.consumerSentiment.change)}
+                    {displayTrends.consumerSentiment.change > 0 ? '+' : ''}
+                    {displayTrends.consumerSentiment.change.toFixed(1)}%
                   </span>
                 </div>
               )}
@@ -185,7 +185,7 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
                           <span className="text-blue-600">Inflation {month.inflation.toFixed(1)}%</span>{' | '}
                           <span className="text-green-600">Interest {month.interest.toFixed(1)}%</span>{' | '}
                           <span className="text-red-600">Unemployment {month.unemployment.toFixed(1)}%</span>{' | '}
-                          <span className="text-purple-600">Market {month.stockIndex.toLocaleString()}</span>
+                          <span className="text-purple-600">Market {month.consumerSentiment.toLocaleString()}</span>
                         </span>
                       ))}
                     </div>
