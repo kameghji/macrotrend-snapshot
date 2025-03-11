@@ -6,7 +6,7 @@ import { MacroData, StockData, TechCompanyData } from '@/lib/data';
 let openaiClient: OpenAI | null = null;
 
 const initializeOpenAI = (apiKey: string): OpenAI => {
-  if (!openaiClient) {
+  if (!openaiClient || openaiClient.apiKey !== apiKey) {
     openaiClient = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true // Only for demo purposes, in production use server-side API calls
@@ -88,7 +88,7 @@ export const fetchEconomicDataWithAI = async (
       ]
     }
     
-    Only return the JSON object, nothing else. The data must be up-to-date and accurate.
+    Only return the JSON object, nothing else. Ensure the data is up-to-date and accurate as of today.
     `;
 
     const response = await client.chat.completions.create({
@@ -96,14 +96,14 @@ export const fetchEconomicDataWithAI = async (
       messages: [
         {
           role: "system",
-          content: "You are an economic data analyst assistant. Extract accurate economic and financial data from provided sources and format it precisely as requested."
+          content: "You are an economic data analyst assistant. Extract accurate economic and financial data from provided sources and format it precisely as requested. Use the most recent data available."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.2, // Lower temperature for more deterministic responses
+      temperature: 0.1, // Lower temperature for more deterministic responses
       response_format: { type: "json_object" }
     });
 

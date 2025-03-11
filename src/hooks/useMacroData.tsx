@@ -1,8 +1,9 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { MacroData, StockData, TechCompanyData, generateMockTechCompanyData } from '@/lib/data';
+import { MacroData, StockData, TechCompanyData, generateMockTechCompanyData, calculateTrends } from '@/lib/data';
 import { fetchEconomicDataWithAI } from '@/services/openaiService';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 // Generate mock data as fallback
 const generateMockData = (): MacroData[] => {
@@ -40,56 +41,6 @@ const generateMockStockData = (): StockData[] => {
   ];
 };
 
-// Calculate trends between the latest two data points
-export const calculateTrends = (data: MacroData[]) => {
-  if (!data || data.length < 2) return null;
-
-  const latest = data[data.length - 1];
-  const previous = data[data.length - 2];
-  
-  return {
-    inflation: {
-      current: latest.inflation,
-      previous: previous.inflation,
-      change: latest.inflation - previous.inflation,
-    },
-    interest: {
-      current: latest.interest,
-      previous: previous.interest,
-      change: latest.interest - previous.interest,
-    },
-    unemployment: {
-      current: latest.unemployment,
-      previous: previous.unemployment,
-      change: latest.unemployment - previous.unemployment,
-    },
-    consumerSentiment: {
-      current: latest.consumerSentiment,
-      previous: previous.consumerSentiment,
-      change: ((latest.consumerSentiment - previous.consumerSentiment) / previous.consumerSentiment) * 100,
-    }
-  };
-};
-
-// Mock fetching functions as fallback
-const fetchMockMacroData = async (): Promise<MacroData[]> => {
-  // Simulate a small delay to mimic network request
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return generateMockData();
-};
-
-const fetchMockStockData = async (): Promise<StockData[]> => {
-  // Simulate a small delay to mimic network request
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return generateMockStockData();
-};
-
-const fetchMockTechCompaniesData = async (): Promise<TechCompanyData[]> => {
-  // Simulate a small delay to mimic network request
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return generateMockTechCompanyData();
-};
-
 // The actual data fetching function that tries to use OpenAI first
 const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   macroData: MacroData[];
@@ -100,9 +51,9 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   if (!apiKey) {
     console.log("No API key provided, using mock data");
     return {
-      macroData: await fetchMockMacroData(),
-      stockData: await fetchMockStockData(),
-      techCompanies: await fetchMockTechCompaniesData()
+      macroData: await generateMockData(),
+      stockData: await generateMockStockData(),
+      techCompanies: await generateMockTechCompanyData()
     };
   }
 
@@ -124,22 +75,38 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   } catch (error) {
     console.error("Error fetching real data, falling back to mock data:", error);
     return {
-      macroData: await fetchMockMacroData(),
-      stockData: await fetchMockStockData(),
-      techCompanies: await fetchMockTechCompaniesData()
+      macroData: await generateMockData(),
+      stockData: await generateMockStockData(),
+      techCompanies: await generateMockTechCompanyData()
     };
   }
 };
 
 export const useMacroData = () => {
+  const { toast } = useToast();
   const [apiKey, setApiKey] = useState<string | null>(
     localStorage.getItem('openai_api_key')
   );
   
   // Function to update the API key
   const updateApiKey = useCallback((newApiKey: string) => {
-    setApiKey(newApiKey);
-  }, []);
+    if (newApiKey) {
+      localStorage.setItem('openai_api_key', newApiKey);
+      setApiKey(newApiKey);
+      toast({
+        title: "API Key Updated",
+        description: "Your OpenAI API key has been saved. Fetching live data...",
+      });
+    }
+  }, [toast]);
+  
+  // Check for API key on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem('openai_api_key');
+    if (savedKey && savedKey !== apiKey) {
+      setApiKey(savedKey);
+    }
+  }, [apiKey]);
   
   // Fetch economic data with react-query
   const { 
@@ -153,6 +120,17 @@ export const useMacroData = () => {
     staleTime: 3600000, // 1 hour in milliseconds
     refetchOnWindowFocus: false,
   });
+  
+  // Show error toast if data fetching fails
+  useEffect(() => {
+    if (error && apiKey) {
+      toast({
+        title: "Error loading data",
+        description: "Could not fetch live economic data. Using mock data instead.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast, apiKey]);
   
   // Calculate trends if macro data is available
   const trends = data?.macroData ? calculateTrends(data.macroData) : null;

@@ -2,34 +2,17 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { formatPercent } from '@/lib/data';
-import { ArrowDown, ArrowUpRight, Minus, RefreshCw, Database } from 'lucide-react';
-import AnimatedNumber from './AnimatedNumber';
-import useMacroData from '@/hooks/useMacroData';
+import { RefreshCw, Database } from 'lucide-react';
 import ApiKeyForm from './ApiKeyForm';
 import { Button } from '@/components/ui/button';
+import useMacroData from '@/hooks/useMacroData';
 
 interface HeroProps {
   className?: string;
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { trends, macroData, isLoading, isRealData, updateApiKey, refetchData } = useMacroData();
-
-  if (!trends && !isLoading) return null;
-
-  const getArrow = (change: number) => {
-    if (change > 0) return <ArrowUpRight className="h-4 w-4" />;
-    if (change < 0) return <ArrowDown className="h-4 w-4" />;
-    return <Minus className="h-4 w-4" />;
-  };
-
-  const getColor = (change: number, inverse = false) => {
-    if (change === 0) return "text-gray-500";
-    if (inverse) {
-      return change < 0 ? "text-green-600" : "text-red-600";
-    }
-    return change > 0 ? "text-green-600" : "text-red-600";
-  };
+  const { isLoading, isRealData, updateApiKey, refetchData } = useMacroData();
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -37,17 +20,6 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
     month: 'long',
     day: 'numeric'
   });
-
-  // Create placeholder data for loading state
-  const placeholderTrends = {
-    inflation: { current: 0, previous: 0, change: 0 },
-    interest: { current: 0, previous: 0, change: 0 },
-    unemployment: { current: 0, previous: 0, change: 0 },
-    consumerSentiment: { current: 0, previous: 0, change: 0 }  // Changed from stockIndex to consumerSentiment
-  };
-
-  // Use actual trends or placeholder based on loading state
-  const displayTrends = isLoading ? placeholderTrends : trends;
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
@@ -79,120 +51,8 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
             <p className="text-xl text-muted-foreground max-w-3xl">
               {isRealData 
                 ? "Live data from Trading Economics, BLS, and Yahoo Finance via OpenAI"
-                : "Monthly overview of key economic indicators with mock data"}
+                : "Please provide an OpenAI API key to view live economic data"}
             </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up [animation-delay:200ms]">
-            <div className={cn("glass p-5 rounded-2xl", isLoading && "animate-pulse")}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Inflation Rate</p>
-              {isLoading ? (
-                <div className="h-8 bg-gray-200/50 rounded-md"></div>
-              ) : (
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-semibold">
-                    <AnimatedNumber 
-                      value={displayTrends.inflation.current} 
-                      formatFn={(v) => formatPercent(v)} 
-                    />
-                  </span>
-                  <span className={cn("flex items-center text-sm", getColor(displayTrends.inflation.change))}>
-                    {getArrow(displayTrends.inflation.change)}
-                    {displayTrends.inflation.change > 0 ? '+' : ''}
-                    {displayTrends.inflation.change.toFixed(1)}%
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className={cn("glass p-5 rounded-2xl", isLoading && "animate-pulse")}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Interest Rate</p>
-              {isLoading ? (
-                <div className="h-8 bg-gray-200/50 rounded-md"></div>
-              ) : (
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-semibold">
-                    <AnimatedNumber 
-                      value={displayTrends.interest.current} 
-                      formatFn={(v) => formatPercent(v)} 
-                    />
-                  </span>
-                  <span className={cn("flex items-center text-sm", getColor(displayTrends.interest.change))}>
-                    {getArrow(displayTrends.interest.change)}
-                    {displayTrends.interest.change > 0 ? '+' : ''}
-                    {displayTrends.interest.change.toFixed(2)}%
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className={cn("glass p-5 rounded-2xl", isLoading && "animate-pulse")}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Unemployment</p>
-              {isLoading ? (
-                <div className="h-8 bg-gray-200/50 rounded-md"></div>
-              ) : (
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-semibold">
-                    <AnimatedNumber 
-                      value={displayTrends.unemployment.current} 
-                      formatFn={(v) => formatPercent(v)} 
-                    />
-                  </span>
-                  <span className={cn("flex items-center text-sm", getColor(displayTrends.unemployment.change, true))}>
-                    {getArrow(displayTrends.unemployment.change)}
-                    {displayTrends.unemployment.change > 0 ? '+' : ''}
-                    {displayTrends.unemployment.change.toFixed(1)}%
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            <div className={cn("glass p-5 rounded-2xl", isLoading && "animate-pulse")}>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Market Index</p>
-              {isLoading ? (
-                <div className="h-8 bg-gray-200/50 rounded-md"></div>
-              ) : (
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-semibold">
-                    <AnimatedNumber 
-                      value={displayTrends.consumerSentiment.current} 
-                      formatFn={(v) => v.toLocaleString()} 
-                    />
-                  </span>
-                  <span className={cn("flex items-center text-sm", getColor(displayTrends.consumerSentiment.change))}>
-                    {getArrow(displayTrends.consumerSentiment.change)}
-                    {displayTrends.consumerSentiment.change > 0 ? '+' : ''}
-                    {displayTrends.consumerSentiment.change.toFixed(1)}%
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Ticker with historical rates */}
-          <div className={cn("glass rounded-2xl p-4 overflow-hidden animate-slide-up [animation-delay:400ms]", 
-                            isLoading && "animate-pulse")}>
-            {isLoading ? (
-              <div className="h-6 bg-gray-200/50 rounded-md w-full"></div>
-            ) : (
-              <div className="ticker-wrapper">
-                <div className="ticker">
-                  {Array(2).fill(macroData).map((data, index) => (
-                    <div key={index} className="inline-flex space-x-8 mx-6">
-                      {data.map((month, i) => (
-                        <span key={i} className="whitespace-nowrap">
-                          <span className="font-medium">{month.date}:</span>{' '}
-                          <span className="text-blue-600">Inflation {month.inflation.toFixed(1)}%</span>{' | '}
-                          <span className="text-green-600">Interest {month.interest.toFixed(1)}%</span>{' | '}
-                          <span className="text-red-600">Unemployment {month.unemployment.toFixed(1)}%</span>{' | '}
-                          <span className="text-purple-600">Market {month.consumerSentiment.toLocaleString()}</span>
-                        </span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
