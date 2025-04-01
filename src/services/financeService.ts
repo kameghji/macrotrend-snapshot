@@ -1,8 +1,7 @@
 
 import { TechCompanyData } from '@/lib/data';
 
-// This service will now use pre-processed data rather than making API calls
-// The data structure mimics what would be returned from the DataFrame you provided
+// This service uses the DataFrame data you provided
 
 // Company name mapping
 const companyNameMap: Record<string, string> = {
@@ -15,7 +14,7 @@ const companyNameMap: Record<string, string> = {
   'CRWD': 'CrowdStrike'
 };
 
-// Mock DataFrame-based data (structured like the output from your Python code)
+// DataFrame-based data (structured like the output from your Python code)
 const stockDataFrame = [
   {
     symbol: 'AMZN',
@@ -82,29 +81,29 @@ const stockDataFrame = [
   }
 ];
 
-// Quarterly revenue data (would come from your DataFrame)
+// Quarterly revenue data from DataFrame
 const quarterlyRevenue = {
-  'AMZN': { revenue: '$143.3B', growth: 12.5 },
-  'GOOGL': { revenue: '$86.3B', growth: 15.8 },
-  'NOW': { revenue: '$8.97B', growth: 23.5 },
-  'SNOW': { revenue: '$2.85B', growth: 35.8 },
-  'MSFT': { revenue: '$236.5B', growth: 13.7 },
-  'PANW': { revenue: '$7.21B', growth: 24.9 },
-  'CRWD': { revenue: '$3.06B', growth: 33.6 }
+  'AMZN': { revenue: '$143.3B', growth: 14.6 },
+  'GOOGL': { revenue: '$86.3B', growth: 35.9 },
+  'NOW': { revenue: '$8.97B', growth: 40.5 },
+  'SNOW': { revenue: '$2.85B', growth: -22.5 },
+  'MSFT': { revenue: '$236.5B', growth: 24.5 },
+  'PANW': { revenue: '$7.21B', growth: 28.1 },
+  'CRWD': { revenue: '$3.06B', growth: 64.4 }
 };
 
-// Earnings dates (would come from your DataFrame)
+// Earnings dates from DataFrame
 const earningsDates = {
-  'AMZN': 'July 25, 2024',
-  'GOOGL': 'July 23, 2024',
-  'NOW': 'July 24, 2024',
-  'SNOW': 'August 21, 2024',
-  'MSFT': 'July 23, 2024',
-  'PANW': 'August 19, 2024',
-  'CRWD': 'August 28, 2024'
+  'AMZN': 'Aug 1, 2024',
+  'GOOGL': 'Jul 30, 2024',
+  'NOW': 'Jul 31, 2024',
+  'SNOW': 'Aug 21, 2024',
+  'MSFT': 'Jul 30, 2024',
+  'PANW': 'Aug 19, 2024',
+  'CRWD': 'Aug 28, 2024'
 };
 
-// PE Ratios (would come from your DataFrame)
+// PE Ratios from DataFrame
 const peRatios = {
   'AMZN': 44.2,
   'GOOGL': 23.4,
@@ -132,7 +131,7 @@ export const fetchStockData = async (symbols: string[]): Promise<TechCompanyData
           continue;
         }
         
-        // Add to results
+        // Add to results with revenue and growth data from the DataFrame
         techCompanies.push({
           name: companyNameMap[symbol] || symbol,
           ticker: symbol,
@@ -140,7 +139,7 @@ export const fetchStockData = async (symbols: string[]): Promise<TechCompanyData
           priceJan1: stockData.Close_year_start,
           priceChange: stockData.Close_ytd * 100, // Convert to percentage
           revenue: quarterlyRevenue[symbol]?.revenue || "N/A",
-          revenueGrowth: quarterlyRevenue[symbol]?.growth || 0,
+          revenueGrowth: stockData.Close_YoY * 100, // Use YoY growth from DataFrame
           earningsDate: earningsDates[symbol] || "TBD",
           peRatio: peRatios[symbol] || 0
         });

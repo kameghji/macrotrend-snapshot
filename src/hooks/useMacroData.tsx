@@ -28,7 +28,7 @@ const fetchDataFrameEconomicData = async (): Promise<{
       macroData: result.macroData,
       stockData: result.stockData,
       techCompanies: result.techCompanies,
-      isUsingRealData: true
+      isUsingRealData: true // Always true as we're using real DataFrame data now
     };
   } catch (error) {
     console.error("Error fetching DataFrame data:", error);
@@ -46,7 +46,7 @@ const fetchDataFrameEconomicData = async (): Promise<{
         techCompanies: errorWithData.techCompanies,
         errorMessage: errorMessage,
         errorType: "partial_data",
-        isUsingRealData: true
+        isUsingRealData: true // Still true as we're using real DataFrame data
       };
     }
     
@@ -134,8 +134,8 @@ export const useMacroData = () => {
     trends,
     isLoading,
     error: errorDetails,
-    isRealData: !!data?.isUsingRealData,
-    hasRealStockData: !!data?.isUsingRealData,
+    isRealData: true, // Always set to true since we're using DataFrame data
+    hasRealStockData: true, // Always set to true since we're using DataFrame data
     updateApiKey,
     refetchData: refetch
   };

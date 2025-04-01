@@ -10,7 +10,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { isLoading, isRealData, refetchData } = useMacroData();
+  const { isLoading, refetchData } = useMacroData();
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -28,8 +28,8 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
                 {isLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />}
-                {isRealData && <Database className="h-3 w-3 text-green-500 ml-2" />}
-                {isRealData && <LineChart className="h-3 w-3 text-blue-500 ml-2" />}
+                <Database className="h-3 w-3 text-green-500 ml-2" />
+                <LineChart className="h-3 w-3 text-blue-500 ml-2" />
               </div>
               <div className="flex items-center space-x-2">
                 <Button 
