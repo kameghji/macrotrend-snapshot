@@ -49,6 +49,7 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
   errorMessage?: string;
   errorType?: string;
   isUsingMockData: boolean;
+  hasRealStockData: boolean;
 }> => {
   // If no API key is provided, fall back to mock data
   if (!apiKey) {
@@ -57,13 +58,28 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
       macroData: await generateMockData(),
       stockData: await generateMockStockData(),
       techCompanies: await generateMockTechCompanyData(),
-      isUsingMockData: true
+      isUsingMockData: true,
+      hasRealStockData: false
     };
   }
 
   try {
     console.log("Fetching real economic data with OpenAI");
     const result = await fetchEconomicDataWithAI(apiKey);
+    
+    // If we have tech company data but no macro data
+    if (!result.success && result.techCompanies.length > 0) {
+      console.log("Partial success: Got real stock data but not economic indicators");
+      return {
+        macroData: await generateMockData(),
+        stockData: result.stockData,
+        techCompanies: result.techCompanies,
+        errorMessage: result.error,
+        errorType: result.errorType,
+        isUsingMockData: true,
+        hasRealStockData: true
+      };
+    }
     
     if (!result.success || !result.macroData.length) {
       console.log("Failed to fetch real data:", result.error);
@@ -75,7 +91,8 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
       macroData: result.macroData,
       stockData: result.stockData,
       techCompanies: result.techCompanies,
-      isUsingMockData: false
+      isUsingMockData: false,
+      hasRealStockData: true
     };
   } catch (error) {
     console.error("Error fetching real data, falling back to mock data:", error);
@@ -95,13 +112,29 @@ const fetchRealEconomicData = async (apiKey: string | null): Promise<{
       errorType = "invalid_key";
     }
     
+    // Check if the error has any tech companies data
+    const errorWithData = error as any;
+    if (errorWithData && errorWithData.techCompanies && errorWithData.techCompanies.length > 0) {
+      console.log("Using real stock data despite OpenAI error");
+      return {
+        macroData: await generateMockData(),
+        stockData: [],
+        techCompanies: errorWithData.techCompanies,
+        errorMessage: errorMessage,
+        errorType: errorType,
+        isUsingMockData: true,
+        hasRealStockData: true
+      };
+    }
+    
     return {
       macroData: await generateMockData(),
       stockData: await generateMockStockData(),
       techCompanies: await generateMockTechCompanyData(),
       errorMessage: errorMessage,
       errorType: errorType,
-      isUsingMockData: true
+      isUsingMockData: true,
+      hasRealStockData: false
     };
   }
 };
@@ -170,19 +203,25 @@ export const useMacroData = () => {
       if (data.errorType === "quota_exceeded") {
         toast({
           title: "API Quota Exceeded",
-          description: "Your OpenAI API key has exceeded its quota. Using mock data instead.",
+          description: data.hasRealStockData 
+            ? "Your OpenAI API key has exceeded its quota. Stock data is still live, but economic indicators are using mock data."
+            : "Your OpenAI API key has exceeded its quota. Using mock data instead.",
           variant: "destructive",
         });
       } else if (data.errorType === "invalid_key") {
         toast({
           title: "Invalid API Key",
-          description: "The OpenAI API key appears to be invalid. Using mock data instead.",
+          description: data.hasRealStockData 
+            ? "The OpenAI API key appears to be invalid. Stock data is still live, but economic indicators are using mock data."
+            : "The OpenAI API key appears to be invalid. Using mock data instead.",
           variant: "destructive",
         });
       } else {
         toast({
           title: "Error loading data",
-          description: "Could not fetch live economic data. Using mock data instead.",
+          description: data.hasRealStockData 
+            ? "Could not fetch economic indicators. Stock data is still live, but economic indicators are using mock data."
+            : "Could not fetch live economic data. Using mock data instead.",
           variant: "destructive",
         });
       }
@@ -213,6 +252,7 @@ export const useMacroData = () => {
     isLoading,
     error: errorDetails,
     isRealData: !!apiKey && !data?.isUsingMockData,
+    hasRealStockData: !!data?.hasRealStockData,
     updateApiKey,
     refetchData: refetch
   };

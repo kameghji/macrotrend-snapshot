@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Database, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Database, AlertTriangle, LineChart } from 'lucide-react';
 import ApiKeyForm from './ApiKeyForm';
 import { Button } from '@/components/ui/button';
 import useMacroData from '@/hooks/useMacroData';
@@ -11,7 +11,7 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ className }) => {
-  const { isLoading, isRealData, updateApiKey, refetchData, error } = useMacroData();
+  const { isLoading, isRealData, hasRealStockData, updateApiKey, refetchData, error } = useMacroData();
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -30,6 +30,7 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
                 <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
                 {isLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />}
                 {isRealData && <Database className="h-3 w-3 text-green-500 ml-2" />}
+                {hasRealStockData && <LineChart className="h-3 w-3 text-blue-500 ml-2" />}
               </div>
               <div className="flex items-center space-x-2">
                 <ApiKeyForm onApiKeySet={updateApiKey} />
@@ -49,8 +50,10 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl">
               {isRealData 
-                ? "Live data from Trading Economics, BLS, and Yahoo Finance via OpenAI"
-                : "Using mock data for demonstration purposes"}
+                ? "Live economic data via OpenAI & Yahoo Finance APIs"
+                : hasRealStockData 
+                  ? "Live stock data via Yahoo Finance, mock economic indicators"
+                  : "Using mock data for demonstration purposes"}
             </p>
             
             {error && (
@@ -60,10 +63,10 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
                   <p className="font-medium text-amber-800">API Error Detected</p>
                   <p className="text-sm text-amber-700">
                     {error.type === "quota_exceeded" 
-                      ? "Your OpenAI API key has exceeded its quota. To see real data, please update your API key or check your OpenAI account billing."
+                      ? "Your OpenAI API key has exceeded its quota. Stock data is still live, but economic indicators are using mock data."
                       : error.type === "invalid_key"
-                        ? "Your OpenAI API key appears to be invalid. Please check the key and try again."
-                        : "Could not connect to OpenAI API. Displaying mock data instead."}
+                        ? "Your OpenAI API key appears to be invalid. Stock data is still live, but economic indicators are using mock data."
+                        : "Could not connect to OpenAI API. Stock data is still live, but economic indicators are using mock data."}
                   </p>
                 </div>
               </div>
