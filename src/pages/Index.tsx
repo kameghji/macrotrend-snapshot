@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Database, GhostIcon } from 'lucide-react';
 import TechCompanyTable from '@/components/TechCompanyTable';
 import EconomicIndicatorsTable from '@/components/EconomicIndicatorsTable';
+import AIArticlesSection from '@/components/AIArticlesSection';
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
@@ -46,6 +47,11 @@ const Index = () => {
       <Hero />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* AI Articles Section */}
+        <AIArticlesSection />
+        
+        <Separator className="my-10" />
+        
         {/* Tech Companies Financial Overview Section */}
         <div className="animate-slide-up [animation-delay:300ms]">
           <div className="flex justify-between items-center mb-6">

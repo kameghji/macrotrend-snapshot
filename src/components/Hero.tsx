@@ -44,7 +44,7 @@ const Hero: React.FC<HeroProps> = ({ className }) => {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Macroeconomic Snapshot
+              AI Powered Market Intelligence
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl">
               Using DataFrame-processed financial and economic data
